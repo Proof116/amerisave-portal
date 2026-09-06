@@ -6,11 +6,13 @@ import {
 } from "@/lib/lending/fee-rules";
 import { parseLoanAmount } from "@/lib/lending/amounts";
 import { stripe } from "@/lib/stripe/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
   try {
     const supabase = await createClient();
+    const adminSupabase = createAdminClient();
 
     const {
       data: { user },
@@ -137,8 +139,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Prevent duplicate successful payments.
-    const { data: successfulPayment } = await supabase
+    // Read payment records through the trusted server client.
+    const { data: successfulPayment } = await adminSupabase
       .from("loan_payments")
       .select("id")
       .eq("application_id", application.id)
@@ -157,7 +159,7 @@ export async function POST(request: Request) {
     }
 
     // Reuse an existing pending/processing payment when possible.
-    const { data: existingPayment } = await supabase
+    const { data: existingPayment } = await adminSupabase
       .from("loan_payments")
       .select(
         "id, amount, stripe_checkout_session_id, status"
@@ -188,6 +190,7 @@ export async function POST(request: Request) {
         ) {
           return NextResponse.json({
             checkoutUrl: existingSession.url,
+            feeAmount,
           });
         }
       } catch (stripeError) {
@@ -200,10 +203,10 @@ export async function POST(request: Request) {
 
     let paymentId = existingPayment?.id;
 
-    // Create the payment record only if one doesn't already exist.
+    // Create the payment record through the trusted server client.
     if (!paymentId) {
       const { data: payment, error: paymentError } =
-        await supabase
+        await adminSupabase
           .from("loan_payments")
           .insert({
             user_id: user.id,
@@ -233,15 +236,17 @@ export async function POST(request: Request) {
       Number(existingPayment?.amount) !== feeAmount
     ) {
       // Keep the payment record synchronized with the
-      // authoritative fee calculation before creating checkout.
-      const { error: updateAmountError } = await supabase
-        .from("loan_payments")
-        .update({
-          amount: feeAmount,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", paymentId)
-        .eq("user_id", user.id);
+      // authoritative server-side fee calculation.
+      const { error: updateAmountError } =
+        await adminSupabase
+          .from("loan_payments")
+          .update({
+            amount: feeAmount,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", paymentId)
+          .eq("application_id", application.id)
+          .eq("user_id", user.id);
 
       if (updateAmountError) {
         console.error(
@@ -293,14 +298,16 @@ export async function POST(request: Request) {
         `${origin}/applications/${application.id}?payment=cancelled`,
     });
 
-    const { error: updateError } = await supabase
-      .from("loan_payments")
-      .update({
-        stripe_checkout_session_id: session.id,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", paymentId)
-      .eq("user_id", user.id);
+    const { error: updateError } =
+      await adminSupabase
+        .from("loan_payments")
+        .update({
+          stripe_checkout_session_id: session.id,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", paymentId)
+        .eq("application_id", application.id)
+        .eq("user_id", user.id);
 
     if (updateError) {
       console.error(
