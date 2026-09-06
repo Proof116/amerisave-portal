@@ -313,15 +313,18 @@ export default async function DashboardPage() {
           </div>
         </section>
 
-        {/* Development Notice */}
-        <section className="mt-10 rounded-xl border border-amber-200 bg-amber-50 p-4">
-          <p className="text-sm leading-6 text-amber-800">
-            <strong>Development mode:</strong> Loan balances are
-            displayed only when connected to an active loan
-            account. No real financial servicing data is connected
-            yet.
-          </p>
-        </section>
+        {/* Loan Servicing Status */}
+<section className="mt-10 rounded-2xl border border-[#dfe4ec] bg-white p-6 shadow-sm">
+  <h2 className="text-lg font-bold text-[#172033]">
+    Loan Servicing
+  </h2>
+
+  <p className="mt-2 text-sm leading-6 text-[#687386]">
+    {typedLoanAccounts.length > 0
+      ? "Your active loan account information and current balances are shown above."
+      : "Loan account balances and servicing information will appear here when an active loan account is established."}
+  </p>
+</section>
 
         {/* Sign Out */}
         <form
