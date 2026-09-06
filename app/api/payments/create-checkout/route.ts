@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
+
+import { calculateProcessingFee } from "@/lib/lending/fees";
+import {
+  PERSONAL_LOAN_PROCESSING_FEE_RULES,
+} from "@/lib/lending/fee-rules";
+import { parseLoanAmount } from "@/lib/lending/amounts";
 import { stripe } from "@/lib/stripe/server";
 import { createClient } from "@/lib/supabase/server";
-
-const PROCESSING_FEE_CENTS = 30_000;
 
 export async function POST(request: Request) {
   try {
@@ -43,7 +47,6 @@ export async function POST(request: Request) {
 
     const trimmedApplicationId = applicationId.trim();
 
-    // Basic UUID validation.
     const uuidPattern =
       /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -54,11 +57,11 @@ export async function POST(request: Request) {
       );
     }
 
-    // Verify that the application belongs to the signed-in user.
+    // Load the application belonging to the authenticated user.
     const { data: application, error: applicationError } =
       await supabase
         .from("loan_applications")
-        .select("id, user_id, loan_type, status")
+        .select("id, user_id, loan_type, status, answers")
         .eq("id", trimmedApplicationId)
         .eq("user_id", user.id)
         .single();
@@ -70,7 +73,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Only an actually recorded approval can enter payment processing.
+    // Payment is only allowed after an actual approval.
     if (application.status !== "approved") {
       return NextResponse.json(
         {
@@ -81,7 +84,60 @@ export async function POST(request: Request) {
       );
     }
 
-    // If a successful payment already exists, do not create another charge.
+    // Currently, processing-fee rules apply to personal loans.
+    if (application.loan_type !== "personal") {
+      return NextResponse.json(
+        {
+          error:
+            "A processing fee is not currently configured for this loan type.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const answers =
+      application.answers &&
+      typeof application.answers === "object" &&
+      !Array.isArray(application.answers)
+        ? (application.answers as Record<string, unknown>)
+        : {};
+
+    // The loan amount must come from the saved application,
+    // never from the payment request supplied by the browser.
+    let loanAmount: number;
+
+    try {
+      loanAmount = parseLoanAmount(answers.loanAmount);
+    } catch {
+      return NextResponse.json(
+        {
+          error:
+            "The approved application does not contain a valid loan amount.",
+        },
+        { status: 400 }
+      );
+    }
+
+    let feeAmount: number;
+
+    try {
+      const fee = calculateProcessingFee(
+        loanAmount,
+        PERSONAL_LOAN_PROCESSING_FEE_RULES
+      );
+
+      feeAmount = fee.feeAmount;
+    } catch {
+      return NextResponse.json(
+        {
+          error:
+            "No processing fee rule applies to this loan amount.",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Prevent duplicate successful payments.
     const { data: successfulPayment } = await supabase
       .from("loan_payments")
       .select("id")
@@ -103,9 +159,12 @@ export async function POST(request: Request) {
     // Reuse an existing pending/processing payment when possible.
     const { data: existingPayment } = await supabase
       .from("loan_payments")
-      .select("id, stripe_checkout_session_id, status")
+      .select(
+        "id, amount, stripe_checkout_session_id, status"
+      )
       .eq("application_id", application.id)
       .eq("user_id", user.id)
+      .eq("purpose", "processing_fee")
       .in("status", ["pending", "processing"])
       .order("created_at", { ascending: false })
       .limit(1)
@@ -114,14 +173,19 @@ export async function POST(request: Request) {
     if (
       existingPayment?.stripe_checkout_session_id &&
       (existingPayment.status === "pending" ||
-        existingPayment.status === "processing")
+        existingPayment.status === "processing") &&
+      Number(existingPayment.amount) === feeAmount
     ) {
       try {
-        const existingSession = await stripe.checkout.sessions.retrieve(
-          existingPayment.stripe_checkout_session_id
-        );
+        const existingSession =
+          await stripe.checkout.sessions.retrieve(
+            existingPayment.stripe_checkout_session_id
+          );
 
-        if (existingSession.status === "open" && existingSession.url) {
+        if (
+          existingSession.status === "open" &&
+          existingSession.url
+        ) {
           return NextResponse.json({
             checkoutUrl: existingSession.url,
           });
@@ -138,18 +202,19 @@ export async function POST(request: Request) {
 
     // Create the payment record only if one doesn't already exist.
     if (!paymentId) {
-      const { data: payment, error: paymentError } = await supabase
-        .from("loan_payments")
-        .insert({
-          user_id: user.id,
-          application_id: application.id,
-          purpose: "processing_fee",
-          amount: 300,
-          currency: "usd",
-          status: "pending",
-        })
-        .select("id")
-        .single();
+      const { data: payment, error: paymentError } =
+        await supabase
+          .from("loan_payments")
+          .insert({
+            user_id: user.id,
+            application_id: application.id,
+            purpose: "processing_fee",
+            amount: feeAmount,
+            currency: "usd",
+            status: "pending",
+          })
+          .select("id")
+          .single();
 
       if (paymentError || !payment) {
         console.error(
@@ -164,6 +229,31 @@ export async function POST(request: Request) {
       }
 
       paymentId = payment.id;
+    } else if (
+      Number(existingPayment?.amount) !== feeAmount
+    ) {
+      // Keep the payment record synchronized with the
+      // authoritative fee calculation before creating checkout.
+      const { error: updateAmountError } = await supabase
+        .from("loan_payments")
+        .update({
+          amount: feeAmount,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", paymentId)
+        .eq("user_id", user.id);
+
+      if (updateAmountError) {
+        console.error(
+          "Payment amount update failed:",
+          updateAmountError
+        );
+
+        return NextResponse.json(
+          { error: "Unable to update payment amount." },
+          { status: 500 }
+        );
+      }
     }
 
     const origin = new URL(request.url).origin;
@@ -175,13 +265,17 @@ export async function POST(request: Request) {
         {
           price_data: {
             currency: "usd",
+
             product_data: {
               name: "Loan Processing Fee",
               description:
                 "Processing fee associated with the approved loan application.",
             },
-            unit_amount: PROCESSING_FEE_CENTS,
+
+            // Stripe expects cents.
+            unit_amount: Math.round(feeAmount * 100),
           },
+
           quantity: 1,
         },
       ],
@@ -222,6 +316,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       checkoutUrl: session.url,
+      feeAmount,
     });
   } catch (error) {
     console.error("Create checkout error:", error);
