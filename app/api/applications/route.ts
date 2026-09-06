@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { parseLoanAmount } from "@/lib/lending/amounts";
 
 type LoanType = "home" | "personal";
 
@@ -123,22 +124,27 @@ export async function POST(request: Request) {
     }
 
     // Validate loan amount when supplied.
-    if (rawAnswers.loanAmount) {
-      const loanAmount = Number(rawAnswers.loanAmount);
+if (rawAnswers.loanAmount) {
+  try {
+    const loanAmount = parseLoanAmount(rawAnswers.loanAmount);
 
-      if (
-        !Number.isFinite(loanAmount) ||
-        loanAmount <= 0 ||
-        loanAmount > 100_000_000
-      ) {
-        return NextResponse.json(
-          {
-            error: "Invalid loan amount.",
-          },
-          { status: 400 }
-        );
-      }
+    if (loanAmount > 100_000_000) {
+      return NextResponse.json(
+        {
+          error: "Loan amount exceeds the maximum allowed amount.",
+        },
+        { status: 400 }
+      );
     }
+  } catch {
+    return NextResponse.json(
+      {
+        error: "Invalid loan amount.",
+      },
+      { status: 400 }
+    );
+  }
+}
 
     // Save application.
     const { data, error } = await supabase
