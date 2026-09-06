@@ -50,8 +50,8 @@ export default function LoanDisclosuresPage() {
               <p className="mt-3 leading-7">
                 A processing fee may apply to an eligible application where
                 permitted by applicable law and the applicable loan agreement.
-                The current application workflow may display a $300 processing
-                fee where that fee applies.
+                The current application workflow may display a processing fee
+                based on the applicable fee schedule and loan amount.
               </p>
 
               <p className="mt-3 leading-7">

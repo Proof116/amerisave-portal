@@ -1,8 +1,22 @@
 import PaymentButton from "./PaymentButton";
+
 import Link from "next/link";
+
 import { notFound, redirect } from "next/navigation";
+
 import { createClient } from "@/lib/supabase/server";
+
 import DocumentUpload from "./DocumentUpload";
+
+import {
+  calculateProcessingFee,
+} from "@/lib/lending/fees";
+
+import {
+  PERSONAL_LOAN_PROCESSING_FEE_RULES,
+} from "@/lib/lending/fee-rules";
+
+import { parseLoanAmount } from "@/lib/lending/amounts";
 
 type Application = {
   id: string;
@@ -92,7 +106,30 @@ export default async function ApplicationDetailsPage({
     .order("uploaded_at", { ascending: false });
 
   const typedApplication = application as Application;
-  const currentTimelineStep = getTimelineStep(typedApplication.status);
+
+let processingFeeAmount: number | undefined;
+
+if (
+  typedApplication.loan_type === "personal" &&
+  typedApplication.status === "approved"
+) {
+  try {
+    const loanAmount = parseLoanAmount(
+      typedApplication.answers?.loanAmount
+    );
+
+    processingFeeAmount = calculateProcessingFee(
+      loanAmount,
+      PERSONAL_LOAN_PROCESSING_FEE_RULES
+    ).feeAmount;
+  } catch {
+    processingFeeAmount = undefined;
+  }
+}
+
+const currentTimelineStep = getTimelineStep(
+  typedApplication.status
+);
 
   const loanName =
     typedApplication.loan_type === "home"
@@ -279,9 +316,10 @@ export default async function ApplicationDetailsPage({
     </p>
 
     <PaymentButton
-      applicationId={typedApplication.id}
-      paymentStatus={payment?.status}
-    />
+  applicationId={typedApplication.id}
+  paymentStatus={payment?.status}
+  feeAmount={processingFeeAmount}
+/>
   </div>
 )}
 

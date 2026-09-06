@@ -12,9 +12,11 @@ type PaymentStatus =
 export default function PaymentButton({
   applicationId,
   paymentStatus,
+  feeAmount,
 }: {
   applicationId: string;
   paymentStatus?: PaymentStatus;
+  feeAmount?: number;
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -24,6 +26,14 @@ export default function PaymentButton({
     paymentStatus === "processing";
 
   const paymentComplete = paymentStatus === "succeeded";
+
+  const formattedFee =
+    typeof feeAmount === "number"
+      ? new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+        }).format(feeAmount)
+      : null;
 
   async function handlePayment() {
     setLoading(true);
@@ -82,6 +92,15 @@ export default function PaymentButton({
 
   return (
     <div className="mt-6">
+      {formattedFee && (
+        <p className="mb-3 text-sm font-medium text-gray-700">
+          Disclosed processing fee:{" "}
+          <span className="font-bold text-gray-900">
+            {formattedFee}
+          </span>
+        </p>
+      )}
+
       <button
         type="button"
         onClick={handlePayment}
@@ -92,7 +111,9 @@ export default function PaymentButton({
           ? "Opening secure checkout..."
           : paymentInProgress
             ? "Payment Processing"
-            : "Pay $300 Processing Fee"}
+            : formattedFee
+              ? `Pay ${formattedFee} Processing Fee`
+              : "Continue to Secure Checkout"}
       </button>
 
       {paymentStatus === "failed" && (
@@ -117,9 +138,9 @@ export default function PaymentButton({
 
       <p className="mt-3 text-xs leading-5 text-gray-500">
         This is a disclosed processing fee associated with the
-        approved application. Payment is handled securely by Stripe.
-        Paying this fee does not guarantee approval, loan funding, or
-        access to loan proceeds.
+        application. Payment is handled securely by Stripe. Paying
+        this fee does not guarantee approval, loan funding, or access
+        to loan proceeds.
       </p>
     </div>
   );
