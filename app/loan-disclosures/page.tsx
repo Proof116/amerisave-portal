@@ -37,7 +37,7 @@ export default function LoanDisclosuresPage() {
               <p className="mt-3 leading-7">
                 Actual loan terms, including applicable interest rates, fees,
                 repayment schedules, and other material terms, will depend on
-                the applicable loan product and the borrower's eligibility.
+                the applicable loan product and the borrower&apos;s eligibility.
                 Required disclosures will be provided before a borrower becomes
                 obligated under applicable law.
               </p>

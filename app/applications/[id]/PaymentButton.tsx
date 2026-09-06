@@ -105,7 +105,7 @@ export default function PaymentButton({
       {paymentStatus === "cancelled" && (
         <p className="mt-3 text-sm text-gray-600">
           The previous payment was cancelled. You can try again when
-          you're ready.
+          you&apos;re ready.
         </p>
       )}
 

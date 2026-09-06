@@ -58,7 +58,7 @@ export default function Home() {
                 </h2>
 
                 <p className="mt-3 text-sm leading-6 text-[#687386]">
-                  Answer a few questions and we'll help you explore the next
+                  Answer a few questions and we&apos;ll help you explore the next
                   steps.
                 </p>
 

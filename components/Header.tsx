@@ -1,23 +1,22 @@
 "use client";
 
-import { LoanApplication } from "@/lib/types";
+import Link from "next/link";
 import { useState } from "react";
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [applications, setApplications] = useState<LoanApplication[]>([]);
 
   return (
     <header className="sticky top-0 z-50 border-b border-[#dfe4ec] bg-white">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 lg:px-8">
         
         {/* Logo */}
-        <a
+        <Link
           href="/"
           className="text-2xl font-bold tracking-[0.22em] text-[#1769e0]"
         >
           AMERISAVE
-        </a>
+        </Link>
 
         {/* Desktop Navigation */}
         <nav className="hidden items-center gap-8 md:flex">

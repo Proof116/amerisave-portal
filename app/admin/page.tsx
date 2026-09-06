@@ -100,7 +100,7 @@ export default async function AdminDashboardPage() {
               </h1>
 
               <p className="mt-2 text-slate-600">
-                Here's what's happening across the application system.
+                Here&apos;s what&apos;s happening across the application system.
               </p>
             </div>
 
