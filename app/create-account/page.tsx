@@ -46,18 +46,33 @@ function CreateAccountForm() {
 
   const {
     data: { subscription },
-  } = supabase.auth.onAuthStateChange((event, session) => {
+  } = supabase.auth.onAuthStateChange(async (event, session) => {
     if (!mounted || !session) {
-      return;
-    }
+  return;
+}
+
+const saved = await savePendingApplication();
+
+if (!saved) {
+  return;
+}
+
+router.replace("/dashboard");
+router.refresh();
 
     if (
-      event === "SIGNED_IN" ||
-      event === "TOKEN_REFRESHED"
-    ) {
-      router.replace("/dashboard");
-      router.refresh();
-    }
+  event === "SIGNED_IN" ||
+  event === "TOKEN_REFRESHED"
+) {
+  const saved = await savePendingApplication();
+
+  if (!saved) {
+    return;
+  }
+
+  router.replace("/dashboard");
+  router.refresh();
+}
   });
 
   return () => {
@@ -76,6 +91,53 @@ function CreateAccountForm() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+
+async function savePendingApplication() {
+  const pendingApplication =
+    sessionStorage.getItem("pendingApplication");
+
+  if (!pendingApplication) {
+    return true;
+  }
+
+  try {
+    const application = JSON.parse(pendingApplication);
+
+    const response = await fetch("/api/applications", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        loanType: application.loanType,
+        answers: application.answers,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        result.error || "Unable to save your application."
+      );
+    }
+
+    sessionStorage.removeItem("pendingApplication");
+
+    return true;
+  } catch (applicationError) {
+    console.error(
+      "Pending application save error:",
+      applicationError
+    );
+
+    setError(
+      "Your account is verified, but we could not save your application. Please try again."
+    );
+
+    return false;
+  }
+}
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

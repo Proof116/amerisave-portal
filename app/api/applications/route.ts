@@ -5,6 +5,8 @@ type LoanType = "home" | "personal";
 
 const ALLOWED_ANSWER_KEYS = new Set([
   "purpose",
+  "state",
+  "homeValue",
   "employment",
   "loanAmount",
   "incomeRange",
