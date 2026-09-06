@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
   try {
     const supabase = await createClient();
+    const adminSupabase = createAdminClient();
 
     const {
       data: { user },
@@ -71,7 +73,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { error: updateError } = await supabase
+    const { error: updateError } = await adminSupabase
       .from("loan_applications")
       .update({
         status: "submitted",
