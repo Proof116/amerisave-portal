@@ -1,6 +1,11 @@
 "use client";
 
-import { FormEvent, Suspense, useState } from "react";
+import {
+  FormEvent,
+  Suspense,
+  useEffect,
+  useState,
+} from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -17,9 +22,49 @@ function CreateAccountForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
 
   const loanType = searchParams.get("loanType");
+
+  useEffect(() => {
+  let mounted = true;
+
+  async function checkSession() {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!mounted || !session) {
+      return;
+    }
+
+    router.replace("/dashboard");
+    router.refresh();
+  }
+
+  checkSession();
+
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange((event, session) => {
+    if (!mounted || !session) {
+      return;
+    }
+
+    if (
+      event === "SIGNED_IN" ||
+      event === "TOKEN_REFRESHED"
+    ) {
+      router.replace("/dashboard");
+      router.refresh();
+    }
+  });
+
+  return () => {
+    mounted = false;
+    subscription.unsubscribe();
+  };
+}, [router, supabase]);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
