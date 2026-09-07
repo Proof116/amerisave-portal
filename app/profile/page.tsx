@@ -72,7 +72,6 @@ export default function ProfilePage() {
         first_name: firstName.trim(),
         last_name: lastName.trim(),
         phone: phone.trim(),
-        updated_at: new Date().toISOString(),
       })
       .eq("id", user.id);
 
