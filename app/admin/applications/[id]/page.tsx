@@ -195,7 +195,12 @@ export default async function AdminApplicationReviewPage({
   const documents = (documentsData ?? []) as ApplicationDocument[];
 
 if (documentsError) {
-  console.error("Admin document RPC error:", documentsError);
+  console.error("Admin document RPC error:", {
+    message: documentsError.message,
+    details: documentsError.details,
+    hint: documentsError.hint,
+    code: documentsError.code,
+  });
 }
   
   const answers =

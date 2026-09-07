@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
   const router = useRouter();
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

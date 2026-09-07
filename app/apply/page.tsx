@@ -124,7 +124,7 @@ const personalLoanQuestions: Question[] = [
 
 export default function ApplyPage() {
   const router = useRouter();
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
 
   const [loanType, setLoanType] = useState<LoanType | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
