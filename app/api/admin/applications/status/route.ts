@@ -116,7 +116,12 @@ export async function POST(request: Request) {
     .eq("id", applicationId);
 
   if (updateError) {
-    console.error("Admin status update error:", updateError);
+    console.error("Admin status update error:", {
+      message: updateError.message,
+      details: updateError.details,
+      hint: updateError.hint,
+      code: updateError.code,
+    });
 
     return redirectToApplication(request, applicationId, {
       error: "status_update_failed",

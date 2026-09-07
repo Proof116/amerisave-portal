@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+
 import { createClient } from "@/lib/supabase/server";
 
 export type AdminApplication = {
@@ -46,8 +47,10 @@ export async function getAdminContext() {
   };
 }
 
-export async function getAllApplications(): Promise<AdminApplication[]> {
-  const { supabase } = await getAdminContext();
+export async function getAllApplications(
+  supabaseOverride?: Awaited<ReturnType<typeof createClient>>
+): Promise<AdminApplication[]> {
+  const supabase = supabaseOverride ?? (await getAdminContext()).supabase;
 
   const { data, error } = await supabase.rpc(
     "admin_get_applications"
@@ -76,17 +79,18 @@ export async function getAdminDashboardStats() {
   }
 
   const stats = {
-  total: Number(data?.total ?? 0),
-  draft: Number(data?.draft ?? 0),
-  submitted: Number(data?.submitted ?? 0),
-  underReview: Number(data?.underReview ?? 0),
-  approved: Number(data?.approved ?? 0),
-  declined: Number(data?.declined ?? 0),
-  homeLoans: Number(data?.homeLoans ?? 0),
-  personalLoans: Number(data?.personalLoans ?? 0),
-  pipelineValue: Number(data?.pipelineValue ?? 0),
-};
-  const applications = await getAllApplications();
+    total: Number(data?.total ?? 0),
+    draft: Number(data?.draft ?? 0),
+    submitted: Number(data?.submitted ?? 0),
+    underReview: Number(data?.underReview ?? 0),
+    approved: Number(data?.approved ?? 0),
+    declined: Number(data?.declined ?? 0),
+    homeLoans: Number(data?.homeLoans ?? 0),
+    personalLoans: Number(data?.personalLoans ?? 0),
+    pipelineValue: Number(data?.pipelineValue ?? 0),
+  };
+
+  const applications = await getAllApplications(supabase);
 
   return {
     stats,
