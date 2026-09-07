@@ -47,7 +47,6 @@ export async function POST(request: Request) {
     );
   }
 
-  // Verify the current user is an admin.
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
@@ -91,22 +90,20 @@ export async function POST(request: Request) {
     );
   }
 
-  // Final decisions can only be made from under review.
-if (
-  (requestedStatus === "approved" ||
-    requestedStatus === "declined") &&
-  application.status !== "under_review"
-) {
-  return redirectToApplication(request, applicationId, {
-    error: "invalid_status_transition",
-  });
-}
-
-  // Nothing needs to be changed if the selected status
-  // is already the current status.
   if (application.status === requestedStatus) {
     return redirectToApplication(request, applicationId, {
       notice: "status_unchanged",
+    });
+  }
+
+  // Final decisions require the application to be under review.
+  if (
+    (requestedStatus === "approved" ||
+      requestedStatus === "declined") &&
+    application.status !== "under_review"
+  ) {
+    return redirectToApplication(request, applicationId, {
+      error: "invalid_status_transition",
     });
   }
 
