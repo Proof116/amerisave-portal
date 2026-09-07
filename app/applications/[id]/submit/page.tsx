@@ -1,5 +1,9 @@
 import Link from "next/link";
+
+import VerificationCenter from "../VerificationCenter";
+
 import { notFound, redirect } from "next/navigation";
+
 import { createClient } from "@/lib/supabase/server";
 
 type Application = {
@@ -158,6 +162,10 @@ export default async function SubmitApplicationPage({
             ))}
           </div>
         </section>
+
+        <VerificationCenter
+          applicationId={typedApplication.id}
+        />
 
         {/* Important Notice */}
         <section className="mt-6 rounded-xl border border-blue-200 bg-blue-50 p-5">

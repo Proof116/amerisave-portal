@@ -364,18 +364,18 @@ export default function DocumentUpload({
           )}
         </div>
 
-        <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-800">
-          <p className="font-semibold">
-            Development Environment
-          </p>
+        <div className="mt-5 rounded-xl border border-blue-100 bg-blue-50 p-4 text-xs text-blue-800">
+  <p className="font-semibold">
+    Document Security
+  </p>
 
-          <p className="mt-1">
-            Use test documents only. Do not upload real
-            Social Security numbers, bank statements,
-            passwords, or other sensitive financial
-            information.
-          </p>
-        </div>
+  <p className="mt-1">
+    Upload only documents requested for your application.
+    Documents are stored securely and may be reviewed as
+    part of the application process. Do not upload passwords
+    or unrelated sensitive information.
+  </p>
+</div>
       </div>
     </section>
   );
