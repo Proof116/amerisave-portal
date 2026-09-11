@@ -274,7 +274,7 @@ export async function POST(request: Request) {
             product_data: {
               name: "Loan Processing Fee",
               description:
-                "Processing fee associated with the approved loan application.",
+                "Processing fee associated with the approved loan application. Payment does not itself guarantee funding or create a funded loan balance.",
             },
 
             // Stripe expects cents.

@@ -24,6 +24,14 @@ type Application = {
   status: "draft" | "submitted" | "under_review" | "approved" | "declined";
   answers: Record<string, string>;
   created_at: string;
+  approved_loan_amount: number | null;
+  approved_apr: number | null;
+  approved_term_months: number | null;
+  approved_monthly_payment: number | null;
+  approved_total_repayment: number | null;
+  approved_total_interest: number | null;
+  approved_processing_fee: number | null;
+  approved_at: string | null;
 };
 
 const answerLabels: Record<string, string> = {
@@ -75,7 +83,21 @@ export default async function ApplicationDetailsPage({
   const { data: application, error } = await supabase
     .from("loan_applications")
     .select(
-      "id, loan_type, status, answers, created_at"
+      `
+        id,
+        loan_type,
+        status,
+        answers,
+        created_at,
+        approved_loan_amount,
+        approved_apr,
+        approved_term_months,
+        approved_monthly_payment,
+        approved_total_repayment,
+        approved_total_interest,
+        approved_processing_fee,
+        approved_at
+      `
     )
     .eq("id", id)
     .eq("user_id", user.id)
@@ -300,26 +322,149 @@ const currentTimelineStep = getTimelineStep(
 
         {typedApplication.status === "approved" && (
   <div className="mt-8 rounded-2xl border border-blue-200 bg-blue-50 p-6">
-    <h2 className="text-lg font-semibold text-blue-950">
+    <h2 className="text-xl font-semibold text-blue-950">
       Application Approved
     </h2>
 
     <p className="mt-2 text-sm leading-6 text-blue-800">
-      Your application has been approved subject to the applicable loan
-      terms, final verification, and required documentation.
+      Your application has been approved. Review the approved loan terms
+      below before proceeding with any applicable processing fee.
     </p>
 
-    <p className="mt-3 text-sm leading-6 text-blue-800">
-      If a processing fee applies, the amount and purpose will be clearly
-      disclosed before you authorize payment. Payment of a fee does not
-      guarantee or unlock loan funds.
-    </p>
+    {typedApplication.approved_loan_amount !== null &&
+      typedApplication.approved_apr !== null &&
+      typedApplication.approved_term_months !== null &&
+      typedApplication.approved_monthly_payment !== null &&
+      typedApplication.approved_total_repayment !== null &&
+      typedApplication.approved_total_interest !== null ? (
+        <>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="rounded-xl border border-blue-100 bg-white p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                Approved Loan Amount
+              </p>
+              <p className="mt-1 text-xl font-semibold text-gray-950">
+                {new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: "USD",
+                }).format(
+                  Number(typedApplication.approved_loan_amount)
+                )}
+              </p>
+            </div>
 
-    <PaymentButton
-  applicationId={typedApplication.id}
-  paymentStatus={payment?.status}
-  feeAmount={processingFeeAmount}
-/>
+            <div className="rounded-xl border border-blue-100 bg-white p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                APR
+              </p>
+              <p className="mt-1 text-xl font-semibold text-gray-950">
+                {Number(typedApplication.approved_apr).toFixed(2)}%
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-blue-100 bg-white p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                Loan Term
+              </p>
+              <p className="mt-1 text-xl font-semibold text-gray-950">
+                {typedApplication.approved_term_months} months
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-blue-100 bg-white p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                Monthly Payment
+              </p>
+              <p className="mt-1 text-xl font-semibold text-gray-950">
+                {new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: "USD",
+                }).format(
+                  Number(typedApplication.approved_monthly_payment)
+                )}
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-blue-100 bg-white p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                Total Interest
+              </p>
+              <p className="mt-1 text-xl font-semibold text-gray-950">
+                {new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: "USD",
+                }).format(
+                  Number(typedApplication.approved_total_interest)
+                )}
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-blue-100 bg-white p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                Total Amount to Repay
+              </p>
+              <p className="mt-1 text-xl font-semibold text-gray-950">
+                {new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: "USD",
+                }).format(
+                  Number(typedApplication.approved_total_repayment)
+                )}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6 rounded-xl border border-blue-200 bg-white p-5">
+            <p className="text-sm font-semibold text-gray-950">
+              Processing Fee
+            </p>
+
+            {typedApplication.approved_processing_fee !== null ? (
+              <p className="mt-1 text-2xl font-bold text-blue-700">
+                {new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: "USD",
+                }).format(
+                  Number(typedApplication.approved_processing_fee)
+                )}
+              </p>
+            ) : (
+              <p className="mt-1 text-sm text-gray-600">
+                No processing fee has been configured for this loan.
+              </p>
+            )}
+
+            <p className="mt-3 text-sm leading-6 text-gray-600">
+              If a processing fee applies, it is separate from the loan
+              principal. Clicking the payment button will take you to
+              Stripe Checkout to authorize the payment. Payment of the
+              processing fee does not by itself create a funded loan balance
+              or guarantee disbursement.
+            </p>
+          </div>
+
+          <div className="mt-6">
+            <PaymentButton
+              applicationId={typedApplication.id}
+              paymentStatus={payment?.status}
+              feeAmount={
+                typedApplication.approved_processing_fee ?? undefined
+              }
+            />
+          </div>
+        </>
+      ) : (
+        <div className="mt-6 rounded-xl border border-yellow-200 bg-yellow-50 p-5">
+          <p className="font-semibold text-yellow-900">
+            Approved — terms pending
+          </p>
+          <p className="mt-1 text-sm leading-6 text-yellow-800">
+            Your application has been approved, but the final loan terms
+            have not yet been recorded. Please check back after the
+            underwriting team completes the approval terms.
+          </p>
+        </div>
+      )}
   </div>
 )}
 

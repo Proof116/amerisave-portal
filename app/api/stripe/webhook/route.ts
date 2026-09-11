@@ -91,7 +91,7 @@ export async function POST(request: Request) {
           await supabase
             .from("loan_payments")
             .select(
-              "id, user_id, application_id, status, stripe_checkout_session_id"
+              "id, user_id, application_id, status, amount, currency, stripe_checkout_session_id"
             )
             .eq("id", paymentId)
             .maybeSingle();
@@ -165,6 +165,39 @@ export async function POST(request: Request) {
 
           break;
         }
+
+const expectedAmountCents = Math.round(
+  Number(payment.amount) * 100
+);
+
+const stripeAmountCents =
+  session.amount_total ?? null;
+
+const stripeCurrency =
+  session.currency?.toLowerCase() ?? null;
+
+const expectedCurrency =
+  String(payment.currency ?? "").toLowerCase();
+
+if (
+  stripeAmountCents === null ||
+  stripeAmountCents !== expectedAmountCents ||
+  stripeCurrency !== expectedCurrency
+) {
+  console.error(
+    "Stripe payment amount or currency does not match loan payment:",
+    {
+      paymentId,
+      sessionId: session.id,
+      expectedAmountCents,
+      stripeAmountCents,
+      expectedCurrency,
+      stripeCurrency,
+    }
+  );
+
+  break;
+}
 
         const paymentIntentId =
           typeof session.payment_intent === "string"

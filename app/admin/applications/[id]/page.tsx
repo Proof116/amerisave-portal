@@ -1,4 +1,6 @@
+import FundLoanButton from "./FundLoanButton";
 import DocumentReviewActions from "./DocumentReviewActions";
+import ApprovedLoanTermsForm from "./ApprovedLoanTermsForm";
 import AdminNav from "../../AdminNav";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -164,7 +166,23 @@ export default async function AdminApplicationReviewPage({
   const { data: application, error } = await supabase
     .from("loan_applications")
     .select(
-      "id, user_id, loan_type, status, answers, created_at, updated_at"
+      `
+        id,
+        user_id,
+        loan_type,
+        status,
+        answers,
+        approved_loan_amount,
+        approved_apr,
+        approved_term_months,
+        approved_monthly_payment,
+        approved_total_repayment,
+        approved_total_interest,
+        approved_processing_fee,
+        approved_at,
+        created_at,
+        updated_at
+      `
     )
     .eq("id", id)
     .single();
@@ -272,6 +290,26 @@ console.log("ADMIN APPLICATION ANSWERS:", answers);
 
                   <p className="mt-1 text-sm text-emerald-700">
                     The application activity timeline has been updated.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {success === "loan_funded" && (
+            <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+              <div className="flex items-start gap-3">
+                <span className="text-lg text-emerald-600">✓</span>
+
+                <div>
+                  <p className="text-sm font-semibold text-emerald-800">
+                    Loan funded successfully.
+                  </p>
+
+                  <p className="mt-1 text-sm text-emerald-700">
+                    The customer&apos;s funded loan account has been created
+                    and the approved principal is now recorded as the loan
+                    balance.
                   </p>
                 </div>
               </div>
@@ -535,6 +573,16 @@ console.log("ADMIN APPLICATION ANSWERS:", answers);
                 </div>
               </section>
 
+              {application.status === "under_review" && (
+                <ApprovedLoanTermsForm
+                  applicationId={application.id}
+                  defaultAmount={application.approved_loan_amount}
+                  defaultApr={application.approved_apr}
+                  defaultTermMonths={application.approved_term_months}
+                  defaultProcessingFee={application.approved_processing_fee}
+                />
+              )}
+
               <section className="rounded-2xl border border-[#dfe4ec] bg-white">
                 <div className="border-b border-[#dfe4ec] p-6">
                   <h2 className="text-lg font-semibold text-[#172033]">
@@ -606,11 +654,16 @@ console.log("ADMIN APPLICATION ANSWERS:", answers);
             <aside className="space-y-6">
               <section className="rounded-2xl border border-[#dfe4ec] bg-white p-6">
                 <h2 className="text-lg font-semibold text-[#172033]">
-                  Review Status
+                  Application Status
                 </h2>
 
                 <p className="mt-1 text-sm text-gray-500">
                   Update the current application status.
+                </p>
+
+                <p className="mt-1 text-xs leading-5 text-gray-500">
+                  Final approval requires approved loan terms and must be
+                  completed through the Approved Loan Terms section.
                 </p>
 
                 <form
@@ -639,7 +692,6 @@ console.log("ADMIN APPLICATION ANSWERS:", answers);
                   >
                     <option value="submitted">Submitted</option>
                     <option value="under_review">Under Review</option>
-                    <option value="approved">Approved</option>
                     <option value="declined">Declined</option>
                   </select>
 
@@ -651,6 +703,60 @@ console.log("ADMIN APPLICATION ANSWERS:", answers);
                   </button>
                 </form>
               </section>
+
+              {application.status === "approved" &&
+                application.approved_loan_amount !== null &&
+                application.approved_apr !== null &&
+                application.approved_term_months !== null &&
+                application.approved_monthly_payment !== null &&
+                application.approved_total_repayment !== null &&
+                application.approved_total_interest !== null && (
+                  <section className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6">
+                    <h2 className="text-lg font-semibold text-emerald-950">
+                      Loan Funding
+                    </h2>
+
+                    <p className="mt-1 text-sm leading-6 text-emerald-800">
+                      Funding creates the actual loan account and places the
+                      approved principal into the customer&apos;s loan balance.
+                    </p>
+
+                    <div className="mt-4 rounded-xl border border-emerald-200 bg-white p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                        Approved Principal
+                      </p>
+
+                      <p className="mt-1 text-xl font-bold text-gray-950">
+                        {new Intl.NumberFormat("en-US", {
+                          style: "currency",
+                          currency: "USD",
+                        }).format(Number(application.approved_loan_amount))}
+                      </p>
+                    </div>
+
+                    {application.approved_processing_fee !== null &&
+                      Number(application.approved_processing_fee) > 0 && (
+                        <p className="mt-4 text-xs leading-5 text-emerald-800">
+                          The processing fee must have a confirmed successful
+                          Stripe payment before this action can fund the loan.
+                        </p>
+                      )}
+
+                    <div className="mt-5">
+                      <FundLoanButton
+                        applicationId={application.id}
+                        processingFee={Number(
+                          application.approved_processing_fee ?? 0
+                        )}
+                      />
+                    </div>
+
+                    <p className="mt-3 text-xs leading-5 text-gray-500">
+                      Funding is separate from processing-fee payment. This
+                      action creates the customer&apos;s loan account.
+                    </p>
+                  </section>
+                )}
 
               <section className="rounded-2xl border border-[#dfe4ec] bg-white p-6">
                 <h2 className="text-lg font-semibold text-[#172033]">
