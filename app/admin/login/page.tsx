@@ -39,7 +39,7 @@ router.refresh();
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <div className="text-2xl font-bold tracking-tight text-blue-700">
-            AMERISAVE
+            GetSaved
           </div>
 
           <p className="mt-1 text-xs font-semibold uppercase tracking-widest text-slate-500">

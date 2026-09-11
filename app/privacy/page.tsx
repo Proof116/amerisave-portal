@@ -4,7 +4,7 @@ export default function PrivacyPage() {
       <section className="mx-auto max-w-4xl px-6 py-16">
         <div className="rounded-3xl border border-gray-200 bg-white p-8 shadow-sm md:p-12">
           <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">
-            AmeriSave
+            GetSaved
           </p>
 
           <h1 className="mt-3 text-4xl font-bold tracking-tight text-gray-900">
@@ -21,7 +21,7 @@ export default function PrivacyPage() {
                 1. Information We Collect
               </h2>
               <p className="mt-3 leading-7">
-                AmeriSave may collect information you provide when creating an
+                GetSaved may collect information you provide when creating an
                 account, submitting a loan application, communicating with our
                 support team, or using our services. This may include contact
                 information, employment and financial information, application
@@ -92,7 +92,7 @@ export default function PrivacyPage() {
               </h2>
               <p className="mt-3 leading-7">
                 If you have questions about this Privacy Policy, contact
-                AmeriSave support.
+                GetSaved support.
               </p>
 
               <div className="mt-4 rounded-2xl bg-gray-50 p-5">

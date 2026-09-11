@@ -4,7 +4,7 @@ export default function LoanDisclosuresPage() {
       <section className="mx-auto max-w-4xl px-6 py-16">
         <div className="rounded-3xl border border-gray-200 bg-white p-8 shadow-sm md:p-12">
           <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">
-            AmeriSave
+            GetSaved
           </p>
 
           <h1 className="mt-3 text-4xl font-bold tracking-tight text-gray-900">

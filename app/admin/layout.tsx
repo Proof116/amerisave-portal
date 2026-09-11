@@ -14,7 +14,7 @@ export default function AdminLayout({
               href="/admin"
               className="text-xl font-bold tracking-tight text-blue-700"
             >
-              AMERISAVE
+              GetSaved
             </Link>
 
             <p className="text-xs font-medium uppercase tracking-wider text-slate-500">

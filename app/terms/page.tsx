@@ -4,7 +4,7 @@ export default function TermsPage() {
       <section className="mx-auto max-w-4xl px-6 py-16">
         <div className="rounded-3xl border border-gray-200 bg-white p-8 shadow-sm md:p-12">
           <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">
-            AmeriSave
+            GetSaved
           </p>
 
           <h1 className="mt-3 text-4xl font-bold tracking-tight text-gray-900">
@@ -21,7 +21,7 @@ export default function TermsPage() {
                 1. Acceptance of These Terms
               </h2>
               <p className="mt-3 leading-7">
-                By accessing or using the AmeriSave website and online
+                By accessing or using the GetSaved website and online
                 services, you agree to these Terms of Use. If you do not agree
                 with these terms, please do not use the services.
               </p>
@@ -32,7 +32,7 @@ export default function TermsPage() {
                 2. Our Services
               </h2>
               <p className="mt-3 leading-7">
-                AmeriSave provides online tools and services that may allow
+                GetSaved provides online tools and services that may allow
                 eligible users to submit and manage applications for mortgage
                 and personal loan products. Availability of products and
                 services may depend on eligibility, applicable law, and other
@@ -125,7 +125,7 @@ export default function TermsPage() {
                 9. Changes to the Service
               </h2>
               <p className="mt-3 leading-7">
-                AmeriSave may modify, suspend, or discontinue portions of the
+                GetSaved may modify, suspend, or discontinue portions of the
                 website or services when reasonably necessary, subject to
                 applicable legal and regulatory requirements.
               </p>

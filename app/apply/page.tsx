@@ -253,7 +253,7 @@ export default function ApplyPage() {
             href="/"
             className="text-xl font-bold tracking-tight"
           >
-            AMERISAVE
+            GetSaved
           </Link>
 
           <Link

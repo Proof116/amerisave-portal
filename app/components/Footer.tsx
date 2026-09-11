@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-6 py-10">
         <div className="grid gap-8 md:grid-cols-4">
           <div>
-            <h2 className="text-lg font-bold text-gray-900">AmeriSave</h2>
+            <h2 className="text-lg font-bold text-gray-900">GetSaved</h2>
             <p className="mt-3 text-sm leading-6 text-gray-600">
               A modern home and personal lending experience.
             </p>
@@ -71,7 +71,7 @@ export default function Footer() {
 
         <div className="mt-10 border-t border-gray-200 pt-6">
           <p className="text-xs leading-5 text-gray-500">
-            © {new Date().getFullYear()} AmeriSave. All rights reserved.
+            © {new Date().getFullYear()} GetSaved. All rights reserved.
           </p>
           <p className="mt-2 text-xs leading-5 text-gray-500">
             Loan applications are subject to eligibility, verification,

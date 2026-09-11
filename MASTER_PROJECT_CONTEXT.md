@@ -1,15 +1,15 @@
 # MASTER PROJECT CONTEXT
 
-## AmeriSave Portal — Lending Core
+## GetSaved Portal — Lending Core
 
-> **Purpose:** This document is the persistent project context for the AmeriSave Portal and its Lending Core.
+> **Purpose:** This document is the persistent project context for the GetSaved Portal and its Lending Core.
 > **Important:** This is documentation, not a terminal script. Do not execute the contents of this file.
 
 ---
 
 # 1. PROJECT IDENTITY
 
-**Project name:** `amerisave-portal`
+**Project name:** `GetSaved-portal`
 
 **Current primary branch:**
 
@@ -20,12 +20,12 @@ feature/lending-core
 **Local project path:**
 
 ```text
-/Users/macbookair/Desktop/amerisave-portal
+/Users/macbookair/Desktop/GetSaved-portal
 ```
 
 **Project purpose:**
 
-Build a modern lending platform / lending core for AmeriSave that can eventually support:
+Build a modern lending platform / lending core for GetSaved that can eventually support:
 
 * User authentication
 * Borrower profiles
@@ -325,7 +325,7 @@ Examples could eventually include:
 * Personal loans
 * Business loans
 * Real-estate-related financing
-* Other products defined by AmeriSave
+* Other products defined by GetSaved
 
 Do not hardcode loan products into UI components if they belong in the database.
 
@@ -852,7 +852,7 @@ There is a separate Voice AI Lab project.
 
 It is intentionally **paused** unless explicitly resumed.
 
-Do not mix Voice AI Lab implementation into AmeriSave Lending Core work unless requested.
+Do not mix Voice AI Lab implementation into GetSaved Lending Core work unless requested.
 
 The Voice AI Lab involved:
 
@@ -863,7 +863,7 @@ The Voice AI Lab involved:
 * Twilio
 * Automated calling concepts
 
-This project context should remain separate from the AmeriSave codebase unless a future integration is intentionally designed.
+This project context should remain separate from the GetSaved codebase unless a future integration is intentionally designed.
 
 ---
 
@@ -981,7 +981,7 @@ When a new task is requested, determine the smallest correct implementation step
 At the time this document was created:
 
 ```text
-Project:        amerisave-portal
+Project:        GetSaved-portal
 Branch:         feature/lending-core
 Primary focus:  Lending Core
 Context file:   MASTER_PROJECT_CONTEXT.md

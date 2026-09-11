@@ -3,7 +3,7 @@ import "./globals.css";
 import Footer from "./components/Footer";
 
 export const metadata: Metadata = {
-  title: "AmeriSave | Home Financing",
+  title: "GetSaved | Home Financing",
   description: "A modern home financing experience.",
 };
 

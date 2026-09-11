@@ -167,7 +167,7 @@ const currentTimelineStep = getTimelineStep(
             href="/dashboard"
             className="text-xl font-bold tracking-tight text-[#1769e0]"
           >
-            AMERISAVE
+            GetSaved
           </Link>
 
           <Link

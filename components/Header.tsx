@@ -15,7 +15,7 @@ export default function Header() {
           href="/"
           className="text-2xl font-bold tracking-[0.22em] text-[#1769e0]"
         >
-          AMERISAVE
+          GetSaved
         </Link>
 
         {/* Desktop Navigation */}

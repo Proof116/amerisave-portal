@@ -174,7 +174,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t border-[#dfe4ec] bg-white">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-8 text-sm text-[#687386] sm:flex-row sm:items-center sm:justify-between lg:px-8">
-          <p>© {new Date().getFullYear()} AmeriSave</p>
+          <p>© {new Date().getFullYear()} GetSaved</p>
 
           <div className="flex gap-5">
             <a href="/privacy" className="hover:text-[#1769e0]">

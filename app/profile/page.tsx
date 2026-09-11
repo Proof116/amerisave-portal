@@ -107,7 +107,7 @@ export default function ProfilePage() {
             href="/dashboard"
             className="text-lg font-bold text-[#172033]"
           >
-            AMERISAVE
+            GetSaved
           </Link>
 
           <Link

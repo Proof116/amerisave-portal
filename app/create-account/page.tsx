@@ -212,7 +212,7 @@ function CreateAccountForm() {
               href="/"
               className="text-2xl font-bold tracking-[0.22em] text-[#1769e0]"
             >
-              AMERISAVE
+              GetSaved
             </Link>
 
             <h1 className="mt-6 text-3xl font-bold tracking-tight text-[#172033]">

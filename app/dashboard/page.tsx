@@ -80,7 +80,7 @@ export default async function DashboardPage() {
             href="/dashboard"
             className="text-xl font-bold tracking-tight text-[#1769e0]"
           >
-            AMERISAVE
+            GetSaved
           </Link>
 
           <div className="flex items-center gap-3">
